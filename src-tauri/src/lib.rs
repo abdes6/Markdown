@@ -16,6 +16,7 @@ pub fn run() {
             commands::zip_vault_cmd,
             commands::pick_folder,
             commands::pick_file,
+            commands::save_file,
             commands::read_vault_config_cmd,
             commands::write_vault_config_cmd
         ])

@@ -194,6 +194,22 @@ pub fn pick_file(app: tauri::AppHandle) -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
+pub fn save_file(
+    app: tauri::AppHandle,
+    default_name: String,
+    ext: String,
+) -> Result<Option<String>, String> {
+    use tauri_plugin_dialog::DialogExt;
+    Ok(app
+        .dialog()
+        .file()
+        .add_filter(&ext.to_uppercase(), &[&ext])
+        .set_file_name(&default_name)
+        .blocking_save_file()
+        .map(|p| p.to_string()))
+}
+
+#[tauri::command]
 pub fn read_vault_config_cmd(root: String) -> Result<String, String> {
     let p = Path::new(&root).join(".mdnotes").join("config.json");
     match fs::read_to_string(&p) {

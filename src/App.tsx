@@ -4,6 +4,7 @@ import Editor from './components/Editor';
 import Preview from './components/Preview';
 import Backlinks from './components/Backlinks';
 import Toast from './components/Toast';
+import Toolbar from './components/Toolbar';
 import { useVaultStore } from './store/vaultStore';
 import { useFileWatch } from './hooks/useFileWatch';
 
@@ -17,6 +18,7 @@ export default function App() {
     <div className="app">
       <Sidebar />
       <main className="center">
+        <Toolbar />
         <div className="editor">
           <Editor />
         </div>

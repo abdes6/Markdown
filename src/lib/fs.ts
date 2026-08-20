@@ -27,4 +27,6 @@ export const fsApi = {
     invoke<string>('read_vault_config_cmd', { root }),
   writeVaultConfig: (root: string, config: string) =>
     invoke<void>('write_vault_config_cmd', { root, config }),
+  saveFile: (defaultName: string, ext: string) =>
+    invoke<string | null>('save_file', { defaultName, ext }),
 };
