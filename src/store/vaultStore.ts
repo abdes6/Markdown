@@ -16,6 +16,7 @@ interface VaultState {
   content: string;
   savedContent: string;
   dirty: boolean;
+  contentCache: Record<string, string>;
   toast: Toast | null;
   openVault: () => Promise<void>;
   openNote: (path: string) => Promise<void>;
@@ -51,6 +52,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   content: '',
   savedContent: '',
   dirty: false,
+  contentCache: {},
   toast: null,
 
   showToast: (message, type = 'info') => {
@@ -64,26 +66,39 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   clearToast: () => set({ toast: null }),
 
   openVault: async () => {
-    const dir = await fsApi.pickFolder();
-    if (!dir) return;
-    const tree = JSON.parse(await fsApi.listFiles(dir)) as TreeNode[];
-    const files = await loadFiles(tree);
-    const notes = buildIndex(files);
-    set({
-      vaultPath: dir,
-      tree,
-      notes,
-      currentPath: null,
-      content: '',
-      savedContent: '',
-      dirty: false,
-    });
-    get().refreshTree();
+    try {
+      const dir = await fsApi.pickFolder();
+      if (!dir) return;
+      const tree = JSON.parse(await fsApi.listFiles(dir)) as TreeNode[];
+      const files = await loadFiles(tree);
+      const notes = buildIndex(files);
+      const contentCache: Record<string, string> = {};
+      for (const f of files) contentCache[f.path] = f.content;
+      set({
+        vaultPath: dir,
+        tree,
+        notes,
+        contentCache,
+        currentPath: null,
+        content: '',
+        savedContent: '',
+        dirty: false,
+      });
+      get().refreshTree();
+    } catch (err) {
+      get().showToast(`打开笔记库失败：${err}`, 'error');
+    }
   },
 
   openNote: async (path: string) => {
-    const content = await fsApi.readFile(path);
-    set({ currentPath: path, content, savedContent: content, dirty: false });
+    try {
+      const cache = get().contentCache[path];
+      const content = cache ?? (await fsApi.readFile(path));
+      set({ currentPath: path, content, savedContent: content, dirty: false });
+    } catch (err) {
+      get().showToast(`无法打开文件：${err}`, 'error');
+      set({ currentPath: null, content: '', savedContent: '', dirty: false });
+    }
   },
 
   setContent: (content: string) =>
@@ -92,18 +107,30 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   save: async () => {
     const { currentPath, content } = get();
     if (!currentPath) return false;
-    await fsApi.writeFile(currentPath, content);
-    set({ savedContent: content, dirty: false });
-    get().refreshTree();
-    return true;
+    try {
+      await fsApi.writeFile(currentPath, content);
+      const contentCache = { ...get().contentCache, [currentPath]: content };
+      set({ savedContent: content, dirty: false, contentCache });
+      get().refreshTree();
+      return true;
+    } catch (err) {
+      get().showToast(`保存失败：${err}`, 'error');
+      return false;
+    }
   },
 
   refreshTree: async () => {
     const { vaultPath } = get();
     if (!vaultPath) return;
-    const tree = JSON.parse(await fsApi.listFiles(vaultPath)) as TreeNode[];
-    const files = await loadFiles(tree);
-    const notes = buildIndex(files);
-    set({ tree, notes });
+    try {
+      const tree = JSON.parse(await fsApi.listFiles(vaultPath)) as TreeNode[];
+      const files = await loadFiles(tree);
+      const notes = buildIndex(files);
+      const contentCache: Record<string, string> = {};
+      for (const f of files) contentCache[f.path] = f.content;
+      set({ tree, notes, contentCache });
+    } catch (err) {
+      get().showToast(`刷新笔记库失败：${err}`, 'error');
+    }
   },
 }));
