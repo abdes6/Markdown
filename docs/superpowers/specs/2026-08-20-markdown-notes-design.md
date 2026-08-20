@@ -13,7 +13,7 @@
 - 编辑器：CodeMirror 6（Obsidian 同款，Markdown 语法高亮与编辑体验成熟）
 - Markdown 渲染：unified / remark / rehype（AST 一次遍历同时完成渲染与索引解析）
 - 状态管理：Zustand
-- 文件监听：chokidar
+- 文件监听：Tauri fs 插件 watch API（Rust 侧监听，事件推送前端）
 - 测试：Vitest + Testing Library（前端）、cargo test（Rust）
 
 ## 3. 架构
@@ -45,7 +45,7 @@
 
 - 打开笔记库时全量扫描：递归读所有 `.md`，解析 frontmatter、提取 `[[链接]]`、`#标签`、标题、字数、修改时间，构建内存索引
 - 索引缓存写入 `.mdnotes/index.json`，下次打开先加载缓存再后台校验增量，减少大库启动等待
-- 前端用 chokidar 监听整个笔记库目录，新增/修改/删除/重命名 → 增量更新索引 → 刷新 UI（外部改动自动同步）
+- 前端用 Tauri fs 插件 watch API（`recursive` + 防抖）监听整个笔记库目录，新增/修改/删除/重命名 → 增量更新索引 → 刷新 UI（外部改动自动同步）
 - 编辑器输入防抖 500ms 自动保存 + `Ctrl+S` 强制保存；保存失败保留本地草稿并 toast 提示
 
 ## 7. 搜索

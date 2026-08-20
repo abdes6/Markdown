@@ -6,7 +6,9 @@
 
 **Architecture:** 前端 React + TypeScript 承载业务逻辑（编辑、预览、索引、搜索、双链、文件监听、HTML 导出），Rust 薄层仅提供文件系统命令与 PDF/ZIP 导出。笔记以纯 `.md` 文件存于用户选定的笔记库文件夹，`.mdnotes/` 目录存放配置与索引缓存。三栏布局：左栏文件树/标签/搜索、中栏编辑器、右栏预览/反向链接。
 
-**Tech Stack:** Tauri 2、React 18、TypeScript、Vite 6、CodeMirror 6、unified/remark/rehype、Zustand、chokidar、Vitest + Testing Library、Rust 1.97。
+**Tech Stack:** Tauri 2、React 18、TypeScript、Vite 6、CodeMirror 6、unified/remark/rehype、Zustand、Tauri fs 插件 watch（文件监听）、Vitest + Testing Library、Rust 1.97。
+
+> 注：计划初版使用 chokidar 做文件监听，实施时发现 chokidar 依赖 Node 内置模块无法在 WebView 打包。已改为 Tauri fs 插件的 `watch` API（Rust 侧监听、事件推送前端），语义等价且更贴合 Tauri 架构。`src/hooks/useFileWatch.ts` 与 Task 6 中对应实现以该 API 为准。
 
 ## Global Constraints
 

@@ -10,7 +10,7 @@
 - 编辑器：CodeMirror 6
 - Markdown 渲染：unified / remark / rehype
 - 状态管理：Zustand
-- 文件监听：chokidar
+- 文件监听：Tauri fs 插件 watch API（Rust 侧监听，事件推送前端）
 - 测试：Vitest + Testing Library（前端）、cargo test（Rust）
 
 ## 常用命令
