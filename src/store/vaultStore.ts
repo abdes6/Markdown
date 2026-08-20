@@ -97,7 +97,6 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       set({ currentPath: path, content, savedContent: content, dirty: false });
     } catch (err) {
       get().showToast(`无法打开文件：${err}`, 'error');
-      set({ currentPath: null, content: '', savedContent: '', dirty: false });
     }
   },
 

@@ -16,6 +16,10 @@ describe('searchNotes', () => {
     const r = searchNotes(files, 'roadmap');
     expect(r.map((x) => x.path)).toEqual(['a.md', 'b.md']);
   });
+  it('标签命中参与排序（优先于正文）', () => {
+    const r = searchNotes(files, 'plan');
+    expect(r.map((x) => x.path)).toEqual(['a.md']);
+  });
   it('无匹配返回空数组', () => {
     expect(searchNotes(files, '不存在')).toEqual([]);
   });
